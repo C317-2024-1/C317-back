@@ -25,3 +25,14 @@ def user_list(request):
                 user_serializer.save()
                 return JsonResponse(user_serializer.data, status=status.HTTP_201_CREATED)
             return JsonResponse(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def register(request):
+    if request.method == 'POST':
+        user_data = JSONParser().parse(request)
+        user_serializer = UserSerializer(data=user_data)
+        if user_serializer.is_valid():
+            user_serializer.save()
+            return JsonResponse(user_serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
