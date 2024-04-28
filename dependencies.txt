@@ -3,3 +3,5 @@ pip install djangorestframework
 pip install djongo
 pip install django-filter
 pip install markdown
+pip install django-cors-headers
+pip install pymongo==3.12.3
