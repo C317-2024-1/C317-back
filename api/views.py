@@ -64,6 +64,7 @@ def login(request):
 
 @api_view(['GET'])
 def user(request):
+
     token = request.COOKIES.get('c317-jwt')
 
     if not token:
@@ -77,3 +78,12 @@ def user(request):
     user = User.objects.filter(id=payload['id']).first()
     user_serializer = UserSerializer(user)
     return Response(user_serializer.data)
+
+@api_view(['POST'])
+def logout(resquest):
+    response = Response()
+    response.delete_cookie('c317-jwt')
+    response.data = {
+        "messages": 'Successfully logged out'
+    }
+    return response
