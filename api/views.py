@@ -102,3 +102,13 @@ def message_handler(request):
 
         return Response(ai_response.data, status.HTTP_201_CREATED)
 
+@api_view(['GET'])
+def user_messages(request):
+    user_id = get_user_id_by_jwt(request)
+    if 'error' in user_id:
+        return Response(user_id, status=status.HTTP_401_UNAUTHORIZED)
+
+    user = User.objects.filter(id=user_id['id']).first()
+    user_messages = user.messages
+
+    return Response(user_messages)
