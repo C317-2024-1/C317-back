@@ -1,8 +1,8 @@
-pip install dnspython
-pip install djangorestframework
-pip install djongo
-pip install django-filter
-pip install markdown
-pip install django-cors-headers
-pip install pymongo==3.12.3
-pip install pyjwt
+dnspython
+djangorestframework
+djongo
+django-filter
+markdown
+django-cors-headers
+pymongo==3.12.3
+pyjwt
