@@ -33,7 +33,7 @@ def login(request):
         if user is None or not user.check_password(password):
             return Response({
                 'message': 'Check your email or password'
-            })
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
         payload = {
             'id': user.id,
@@ -95,9 +95,6 @@ def message_handler(request):
         user = save_message(user_id['id'], message)         
         
         ai_response = get_ai_response(user_id['id'], message['message'])
-
-        if user is None:
-            return Response({'message': 'An error occurred'}, status=status.HTTP_400_BAD_REQUEST)
         
 
         return Response(ai_response.data, status.HTTP_201_CREATED)
