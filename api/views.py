@@ -6,19 +6,10 @@ from rest_framework import status
 from rest_framework.response import Response
 import jwt, datetime 
 
-from api.models import User, Message
-from api.serializers import UserSerializer, MessageSerializer
+from api.models import User
+from api.serializers import UserSerializer
 from rest_framework.decorators import api_view
-
-@api_view(['GET', 'POST', 'DELETE', 'PUT'])
-def user_list(request):
-    if request.method == 'GET':
-        users = User.objects.all()
-        user = request.query_params.get('name', None)
-        if user is not None:
-            users = users.filter(name__icontains=user)
-        users_serializer = UserSerializer(users, many=True)
-        return JsonResponse(users_serializer.data, safe=False, status=status.HTTP_200_OK)
+from api.utils import *
 
 @api_view(['POST'])
 def register(request):
@@ -65,17 +56,14 @@ def login(request):
 @api_view(['GET'])
 def user(request):
 
-    token = request.COOKIES.get('c317-jwt')
+    user_id = get_user_id_by_jwt(request)
 
-    if not token:
-        return Response({'error': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    try:
-        payload = jwt.decode(token, 'c317-scret-key', algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return Response({'error': 'Token expired'}, status=status.HTTP_401_UNAUTHORIZED)
+    if 'error' in user_id:
+        return Response(user_id, status=status.HTTP_401_UNAUTHORIZED)
 
-    user = User.objects.filter(id=payload['id']).first()
+
+    user = User.objects.filter(id=user_id['id']).first()
     user_serializer = UserSerializer(user)
     return Response(user_serializer.data)
 
@@ -87,3 +75,30 @@ def logout(resquest):
         "messages": 'Successfully logged out'
     }
     return response
+
+@api_view(['POST'])
+def message_handler(request):
+    if request.method == 'POST':
+        if request.data.get('message') == '':
+            return Response({'message': 'Message cannot be empty'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_id = get_user_id_by_jwt(request)
+        if 'error' in user_id:
+            return Response(user_id, status=status.HTTP_401_UNAUTHORIZED)
+        
+        message = {
+            'message': request.data.get('message'),
+            'date': datetime.datetime.now(),
+            'isUserMessage': True
+        }
+
+        user = save_message(user_id['id'], message)         
+        
+        ai_response = get_ai_response(user_id['id'], message['message'])
+
+        if user is None:
+            return Response({'message': 'An error occurred'}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+        return Response(ai_response.data, status.HTTP_201_CREATED)
+
