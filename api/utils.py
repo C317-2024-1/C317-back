@@ -4,6 +4,14 @@ import datetime
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User
+from pathlib import Path
+import sys
+
+IA_DIR = Path(__file__).resolve().parent.parent.parent.joinpath('C317-AI')
+
+sys.path.append(str(IA_DIR))
+
+from chat import ask
 
 def get_user_id_by_jwt(request):
     token = request.COOKIES.get('c317-jwt')
@@ -30,7 +38,7 @@ def get_ai_response(user_id, message):
     '''
 
     ai_response = {
-        'message': 'Hello, I am an AI',
+        'message': ask(message),
         'date': datetime.datetime.now(),
         'isUserMessage': False
     }
